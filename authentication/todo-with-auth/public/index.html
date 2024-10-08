@@ -32,12 +32,75 @@
 
             alert(response.data.message);
 
+
             //if response is between 200-299 status code then remove signup section first
             if(response.status == 200){
                 document.getElementById('login-section').innerHTML = '';
-            } 
 
+                //inject create todo title input and button
+                const todosSection = document.getElementById('todos-section');
+
+                const createTodosSection = document.createElement('div');
+                createTodosSection.setAttribute('id','create-todos-section');
+
+                const todoInput = document.createElement('input');
+                todoInput.setAttribute('type','text');
+                todoInput.setAttribute('placeholder','Enter title of new todo here...');
+                todoInput.setAttribute('id','todo-input');
+
+                const createTodoBtn = document.createElement('button');
+                createTodoBtn.setAttribute('onclick', `createNewTodo()`);
+                createTodoBtn.innerHTML = 'Create Todo!';
+
+                createTodosSection.appendChild(todoInput);
+                createTodosSection.appendChild(createTodoBtn);
+
+                todosSection.appendChild(createTodosSection);
+
+                // print the todos of the particular user on the screen
+
+                //get all the todos in json format from this endpoint of the user
+                const token = localStorage.getItem('token');
+                const todosList = await axios.get('http://localhost:3000/printTodos', {
+                headers: {
+                'Authorization': `${token}` // Include the token in the auth headers as this route uses auth middleware
+                }
+                });
+
+                //inject all the todos onto the screen
+                const displayTodosSection = document.createElement('div');
+                displayTodosSection.setAttribute('id','display-todos-section');
+                
+                //create the todo divs here
+                for(let i = 0; i < todosList.length; i++){
+                    const todoDiv = document.createElement('div');
+                    todoDiv.setAttribute('id',`${username}-todo-${i}`);
+                    const todoDivTitle = document.createElement('h4');
+                    h4.innerHTML = `${todos[i]}`;
+                    const todoDeleteBtn = document.createElement('button');
+                    todoDeleteBtn.setAttribute('id', `${username}-todo-delete-btn-${i}`);
+                    todoDeleteBtn.setAttribute('onclick', `deleteTodo(${username}-todo-${i})`);
+                    todoDeleteBtn.innerHTML = 'Delete';
+                    todoDiv.appendChild(todoDivTitle);
+                    todoDiv.appendChild(todoDeleteBtn);
+                    displayTodosSection.appendChild(todoDiv);
+                }
+                todosSection.appendChild(displayTodosSection);
+            }
         }
+
+        // async function deleteTodo(todoDivId){
+        //     //delete from db so send a req to the be server
+            
+        //     //delete from screen
+        //     const todoDiv = document.getElementById(`${todoDivId}`);
+        //     if (todoDiv) {
+        //         todoDiv.parentNode.removeChild(element); // Remove the element
+        //     } else {
+        //     console.log('Element not found');
+        //     }
+
+        // }
 
         async function logout(){
             if(!localStorage.getItem('token')){
@@ -46,9 +109,8 @@
             else{
                 //remove auth token from local storage
                 localStorage.removeItem('token');
-
                 //remove the todos section here
-
+                document.getElementById('todos-section').innerHTML = '';
                 //inject the login-section again here
                 const loginSection = document.getElementById('login-section');
 
@@ -109,6 +171,40 @@
             
         }
 
+        async function createNewTodo(){
+            //get todo title value, send it to BE Server in json format and the token in auth headers to BE as well
+            const token = localStorage.getItem('token');
+            const todoTitle = document.getElementById('todo-input').value;
+            const response = await axios.post('http://localhost:3000/createTodo', { //here give full link in axios
+                title: todoTitle     //no need to put username on left(property) in inverted commas
+            },{
+                headers: {
+                'Authorization': `${token}` // Include the token in the auth headers s this route uses auth middleware
+                }
+            });
+            alert(response.data.message);
+
+            //print the todos here as well each time a new todo is created
+            const todosList = await axios.get('http://localhost:3000/printTodos', {
+                headers: {
+                'Authorization': `${token}` // Include the token in the auth headers as this route uses auth middleware
+                }
+                });
+            
+            //inject all the todos onto the screen
+            const todosSection = document.getElementById('todos-section');
+            
+            const displayTodosSection = document.createElement('div');
+            displayTodosSection.setAttribute('id','display-todos-section');
+
+            // come back here after signin printing functionality
+
+
+
+
+            
+        }
+
     </script>
   </head>
   <body>
@@ -126,6 +222,7 @@
             <button onclick="signin()">Submit</button>
         </div>
     </div>
+    <div id="todos-section"></div>
     <div id="logout-section">
         <button onclick="logout()">Logout</button>
     </div>
