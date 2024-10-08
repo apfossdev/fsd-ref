@@ -17,24 +17,117 @@
 
             alert(response.data.message);
         }
+
+        async function signin(){
+            const username = document.getElementById('signin-username').value;
+            const password = document.getElementById('signin-password').value;
+
+            const response = await axios.post('http://localhost:3000/signin', { //here give full link in axios
+                username: username,       //no need to put username on left(property) in inverted commas
+                password: password
+            });
+
+            //storing the token locally from the response received above
+            localStorage.setItem('token', response.data.token);
+
+            alert(response.data.message);
+
+            //if response is between 200-299 status code then remove signup section first
+            if(response.status == 200){
+                document.getElementById('login-section').innerHTML = '';
+            } 
+
+        }
+
+        async function logout(){
+            if(!localStorage.getItem('token')){
+                alert(`You are not logged in!`);
+            }
+            else{
+                //remove auth token from local storage
+                localStorage.removeItem('token');
+
+                //remove the todos section here
+
+                //inject the login-section again here
+                const loginSection = document.getElementById('login-section');
+
+                //create signup section
+                const signupSection = document.createElement('div');
+
+                const signupTextNode = document.createTextNode("Signup");
+
+                const signupUsername = document.createElement('input');
+                signupUsername.setAttribute('type','text');
+                signupUsername.setAttribute('placeholder','Username');
+                signupUsername.setAttribute('id','signup-username');
+
+                const signupPassword = document.createElement('input');
+                signupPassword.setAttribute('type','password');
+                signupPassword.setAttribute('placeholder','Password');
+                signupPassword.setAttribute('id','signup-password');
+
+                const signupButton = document.createElement('button');
+                signupButton.setAttribute('onclick', 'signup()');
+                signupButton.innerHTML = 'Submit';
+
+                signupSection.appendChild(signupTextNode);
+                signupSection.appendChild(signupUsername);
+                signupSection.appendChild(signupPassword);
+                signupSection.appendChild(signupButton);
+
+                loginSection.appendChild(signupSection);
+
+                //create signin section
+                const signinSection = document.createElement('div');
+
+                const signinTextNode = document.createTextNode("Signin");
+
+                const signinUsername = document.createElement('input');
+                signinUsername.setAttribute('type','text');
+                signinUsername.setAttribute('placeholder','Username');
+                signinUsername.setAttribute('id','signin-username');
+
+                const signinPassword = document.createElement('input');
+                signinPassword.setAttribute('type','password');
+                signinPassword.setAttribute('placeholder','Password');
+                signinPassword.setAttribute('id','signin-password');
+
+                const signinButton = document.createElement('button');
+                signinButton.setAttribute('onclick', 'signin()');
+                signinButton.innerHTML = 'Submit';
+
+                signinSection.appendChild(signinTextNode);
+                signinSection.appendChild(signinUsername);
+                signinSection.appendChild(signinPassword);
+                signinSection.appendChild(signinButton);
+
+                loginSection.appendChild(signinSection);
+                
+                alert(`You've been logged out successfully`);
+            }
+            
+        }
+
     </script>
   </head>
   <body>
-    <div>
-        Signup
-        <input type="text" placeholder="Username" id="signup-username">
-        <input type="password" placeholder="Password" id="signup-password">
-        <button onclick="signup()">Submit</button>
+    <div id="login-section">
+        <div>
+            Signup
+            <input type="text" placeholder="Username" id="signup-username">
+            <input type="password" placeholder="Password" id="signup-password">
+            <button onclick="signup()">Submit</button>
+        </div>
+        <div>
+            Signin
+            <input type="text" placeholder="Username" id="signin-username">
+            <input type="password" placeholder="Password" id="signin-password">
+            <button onclick="signin()">Submit</button>
+        </div>
     </div>
-    <div>
-        Signin
-        <input type="text" placeholder="Username" id="signin-username">
-        <input type="password" placeholder="Password" id="signin-password">
-        <button onclick="signin()">Submit</button>
-    </div>
-    <div>
+    <div id="logout-section">
         <button onclick="logout()">Logout</button>
     </div>
-
   </body>
 </html>
