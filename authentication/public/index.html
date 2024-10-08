@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth website</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
+    <script>
+        async function signup(){
+            const username = document.getElementById('signupUsername').value;
+            const password = document.getElementById('signupPassword').value;
+
+            await axios.post('http://localhost:3000/signup', {
+                username: username,
+                password: password
+            });
+            alert('You have signed up!');
+        }
+
+        async function signin(){
+            const username = document.getElementById('signinUsername').value;
+            const password = document.getElementById('signinPassword').value;
+
+            const response = await axios.post('http://localhost:3000/signin', {
+                username: username,
+                password: password
+            });
+            //to store users preferences use localStorage
+            localStorage.setItem('token', response.data.token);
+
+            alert('You have signed in!');
+        }
+    
+        async function getUserInformation(){
+            const response = await axios.get('http://localhost:3000/me', {
+                headers: {
+                    token: localStorage.getItem('token')
+                }
+            });
+            document.getElementById('information').innerHTML = `Username: ${response.data.username}  Password: ${response.data.password} `
+        }
+
+        getUserInformation();
+
+        function logout(){
+            localStorage.removeItem('token'); //by just removing the token key from the user
+        }
+
+    </script>
+</head>
+<body>
+    <div>
+        Signup
+        <input id="signupUsername" type="text" name="username" placeholder="Username">
+        <input id="signupPassword" type="password" name="password" placeholder="Password">
+        <button onclick="signup()">Submit</button>
+    </div>
+    <div>
+        Signin
+        <input id="signinUsername" type="text" name="username" placeholder="Username">
+        <input id="signinPassword" type="password" name="password" placeholder="Password">
+        <button onclick="signin()">Submit</button>
+    </div>
+    <div>
+        User Information:
+        <div id="information"></div>
+    </div>
+    <div>
+        <button onclick="logout()">Logout</button>
+    </div>
+        
+</body>
+</html>
+
+<!-- things to implement yet in this page recode the whole thing on your own once again
+and do this too 
+
+### Assignment
+
+Conditionally render the `logout` or the `signin`/ `signup` pages based on if the user is already logged in or not
+
+//and 
+
+# Assignment: Creating a TODO app
+
+Try to create a TODO application where
+
+User can signup/signin
+User can create/delete/update TODOs
+User can see their existing todos and mark them as done -->
+

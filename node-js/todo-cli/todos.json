@@ -1,0 +1,14 @@
+[
+  {
+    "task": "self terminate",
+    "completed": "no"
+  },
+  {
+    "task": "hi",
+    "completed": "no"
+  },
+  {
+    "task": "kill a mockingbird",
+    "completed": "yes"
+  }
+]

@@ -1,0 +1,50 @@
+<body>
+    <input type="text"></input>
+    <button onclick="addTodo()">Add todo!</button>
+    <div id="todos">
+
+    </div>
+  
+  <script>
+    let id_counter = 1;
+    let todos = [];
+
+    function render(todos) {
+        const parentNode = document.querySelector("#todos");
+        parentNode.replaceChildren(); //remove all children of an array 
+        for(let i = 0; i < todos.length; i++){
+            const mainDiv = document.createElement("div");
+            const h1 = document.createElement("h1");
+            const deleteButton = document.createElement("button");
+            deleteButton.innerHTML = "Delete";
+            deleteButton.setAttribute("id", todos[i].id);
+            deleteButton.setAttribute("onclick", "deleteTodo(" + todos[i].id + ")");
+            h1.innerHTML = todos[i].description;
+            mainDiv.appendChild(h1);
+            mainDiv.appendChild(deleteButton); 
+            parentNode.appendChild(mainDiv);
+        }
+    }
+
+    function addTodo() {
+      todos.push({
+        id: id_counter,
+        description: document.querySelector("input").value
+      });
+      document.querySelector("input").value = '';
+      render(todos);
+      id_counter++;
+    }
+
+    function deleteTodo(id) {
+      for(let i = 0; i < todos.length; i++){
+        if(todos[i]["id"] == id){
+            todos.splice(i,1); //this removes the element as well unlike delete todo[i] which will leave the space after the deletion redirecting to undefined
+        }
+      }
+      render(todos);
+    }
+ 
+    
+  </script>
+</body>
