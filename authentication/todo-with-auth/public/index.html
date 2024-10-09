@@ -6,225 +6,299 @@
     <title>todo app</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
     <script>
-        async function signup(){
-            const username = document.getElementById('signup-username').value;
-            const password = document.getElementById('signup-password').value;
+      async function signup() {
+        const username = document.getElementById("signup-username").value;
+        const password = document.getElementById("signup-password").value;
 
-            const response = await axios.post('http://localhost:3000/signup', { //here give full link in axios
-                username: username,       //no need to put username on left(property) in inverted commas
-                password: password
-            });
+        const response = await axios.post("http://localhost:3000/signup", {
+          //here give full link in axios
+          username: username, //no need to put username on left(property) in inverted commas
+          password: password,
+        });
 
-            alert(response.data.message);
-        }
+        alert(response.data.message);
+      }
 
-        async function signin(){
-            const username = document.getElementById('signin-username').value;
-            const password = document.getElementById('signin-password').value;
+      async function signin() {
+        const username = document.getElementById("signin-username").value;
+        const password = document.getElementById("signin-password").value;
 
-            const response = await axios.post('http://localhost:3000/signin', { //here give full link in axios
-                username: username,       //no need to put username on left(property) in inverted commas
-                password: password
-            });
+        const response = await axios.post("http://localhost:3000/signin", {
+          //here give full link in axios
+          username: username, //no need to put username on left(property) in inverted commas
+          password: password,
+        });
 
-            //storing the token locally from the response received above
-            localStorage.setItem('token', response.data.token);
+        //storing the token locally from the response received above
+        localStorage.setItem("token", response.data.token);
 
-            alert(response.data.message);
+        alert(response.data.message);
 
+        //if response is between 200-299 status code then remove signup section first
+        if (response.status == 200) {
+          document.getElementById("login-section").innerHTML = "";
 
-            //if response is between 200-299 status code then remove signup section first
-            if(response.status == 200){
-                document.getElementById('login-section').innerHTML = '';
+          //inject create todo title input and button
+          const todosSection = document.getElementById("todos-section");
 
-                //inject create todo title input and button
-                const todosSection = document.getElementById('todos-section');
+          const createTodosSection = document.createElement("div");
+          createTodosSection.setAttribute("id", "create-todos-section");
 
-                const createTodosSection = document.createElement('div');
-                createTodosSection.setAttribute('id','create-todos-section');
+          const todoInput = document.createElement("input");
+          todoInput.setAttribute("type", "text");
+          todoInput.setAttribute(
+            "placeholder",
+            "Enter title of new todo here..."
+          );
+          todoInput.setAttribute("id", "todo-input");
 
-                const todoInput = document.createElement('input');
-                todoInput.setAttribute('type','text');
-                todoInput.setAttribute('placeholder','Enter title of new todo here...');
-                todoInput.setAttribute('id','todo-input');
+          const createTodoBtn = document.createElement("button");
+          createTodoBtn.setAttribute("onclick", `createNewTodo()`);
+          createTodoBtn.innerHTML = "Create Todo!";
 
-                const createTodoBtn = document.createElement('button');
-                createTodoBtn.setAttribute('onclick', `createNewTodo()`);
-                createTodoBtn.innerHTML = 'Create Todo!';
+          createTodosSection.appendChild(todoInput);
+          createTodosSection.appendChild(createTodoBtn);
 
-                createTodosSection.appendChild(todoInput);
-                createTodosSection.appendChild(createTodoBtn);
+          todosSection.appendChild(createTodosSection);
 
-                todosSection.appendChild(createTodosSection);
+          // print the todos of the particular user on the screen
 
-                // print the todos of the particular user on the screen
-
-                //get all the todos in json format from this endpoint of the user
-                const token = localStorage.getItem('token');
-                const todosList = await axios.get('http://localhost:3000/printTodos', {
-                headers: {
-                'Authorization': `${token}` // Include the token in the auth headers as this route uses auth middleware
-                }
-                });
-
-                //inject all the todos onto the screen
-                const displayTodosSection = document.createElement('div');
-                displayTodosSection.setAttribute('id','display-todos-section');
-                
-                //create the todo divs here
-                for(let i = 0; i < todosList.length; i++){
-                    const todoDiv = document.createElement('div');
-                    todoDiv.setAttribute('id',`${username}-todo-${i}`);
-                    const todoDivTitle = document.createElement('h4');
-                    h4.innerHTML = `${todos[i]}`;
-                    const todoDeleteBtn = document.createElement('button');
-                    todoDeleteBtn.setAttribute('id', `${username}-todo-delete-btn-${i}`);
-                    todoDeleteBtn.setAttribute('onclick', `deleteTodo(${username}-todo-${i})`);
-                    todoDeleteBtn.innerHTML = 'Delete';
-                    todoDiv.appendChild(todoDivTitle);
-                    todoDiv.appendChild(todoDeleteBtn);
-                    displayTodosSection.appendChild(todoDiv);
-                }
-                todosSection.appendChild(displayTodosSection);
+          //get all the todos from this endpoint of the user
+          const token = localStorage.getItem("token");
+          const printTodosResponse = await axios.get(
+            "http://localhost:3000/printTodos",
+            {
+              headers: {
+                Authorization: `${token}`, // Include the token in the auth headers as this route uses auth middleware
+              },
             }
+          );
+
+          console.log(printTodosResponse.data); //to access the data part of the response
+          const todosList = printTodosResponse.data;
+
+          //inject all the todos onto the screen
+          const displayTodosSection = document.createElement("div");
+          displayTodosSection.setAttribute("id", "display-todos-section");
+
+          //create the todo divs here
+          for (let i = 0; i < todosList.length; i++) {
+            const todoDiv = document.createElement("div");
+            todoDiv.setAttribute("id", `${username}-todo-${i}`);
+
+            const todoDivTitle = document.createElement(`h4`);
+            todoDivTitle.innerHTML = `${todosList[i]}`;
+            todoDivTitle.setAttribute("id", `${username}-todo-${i}-title`);
+
+            const todoDeleteBtn = document.createElement("button");
+            todoDeleteBtn.setAttribute(
+              "id",
+              `${username}-todo-delete-btn-${i}`
+            );
+            todoDeleteBtn.setAttribute(
+              "onclick",
+              `deleteTodo(${username}-todo-${i},${todosList[i]})`
+            );
+            todoDeleteBtn.innerHTML = "Delete";
+
+            todoDiv.appendChild(todoDivTitle);
+            todoDiv.appendChild(todoDeleteBtn);
+            displayTodosSection.appendChild(todoDiv);
+          }
+          todosSection.appendChild(displayTodosSection);
         }
+      }
 
-        // async function deleteTodo(todoDivId){
-        //     //delete from db so send a req to the be server
-            
-        //     //delete from screen
-        //     const todoDiv = document.getElementById(`${todoDivId}`);
-        //     if (todoDiv) {
-        //         todoDiv.parentNode.removeChild(element); // Remove the element
-        //     } else {
-        //     console.log('Element not found');
-        //     }
-
-        // }
-
-        async function logout(){
-            if(!localStorage.getItem('token')){
-                alert(`You are not logged in!`);
+      async function deleteTodo(todoDivId, todoDivText) {
+        //delete from db so send a req to the be server
+        const token = localStorage.getItem("token");
+        const response = await axios.delete(
+          "http://localhost:3000/deleteTodo",{
+            data:{
+                todoToBeDeleted: todoDivText
+            },
+            headers:{
+                Authorization: `${token}`, // Include the token in the auth headers as this route uses auth middleware
             }
-            else{
-                //remove auth token from local storage
-                localStorage.removeItem('token');
-                //remove the todos section here
-                document.getElementById('todos-section').innerHTML = '';
-                //inject the login-section again here
-                const loginSection = document.getElementById('login-section');
+          }
+        );
 
-                //create signup section
-                const signupSection = document.createElement('div');
+        console.log(response.data);
 
-                const signupTextNode = document.createTextNode("Signup");
+        // delete from screen ------
+        const todoDiv = document.getElementById(`${todoDivId}`);
+        if (todoDiv) {
+          todoDiv.parentNode.removeChild(todoDiv); // Remove the element
+        } else {
+          console.log("Element not found");
+        }
+      }
 
-                const signupUsername = document.createElement('input');
-                signupUsername.setAttribute('type','text');
-                signupUsername.setAttribute('placeholder','Username');
-                signupUsername.setAttribute('id','signup-username');
+      async function logout() {
+        if (!localStorage.getItem("token")) {
+          alert(`You are not logged in!`);
+        } else {
+          //remove auth token from local storage
+          localStorage.removeItem("token");
+          //remove the todos section here
+          document.getElementById("todos-section").innerHTML = "";
+          //inject the login-section again here
+          const loginSection = document.getElementById("login-section");
 
-                const signupPassword = document.createElement('input');
-                signupPassword.setAttribute('type','password');
-                signupPassword.setAttribute('placeholder','Password');
-                signupPassword.setAttribute('id','signup-password');
+          //create signup section
+          const signupSection = document.createElement("div");
 
-                const signupButton = document.createElement('button');
-                signupButton.setAttribute('onclick', 'signup()');
-                signupButton.innerHTML = 'Submit';
+          const signupTextNode = document.createTextNode("Signup");
 
-                signupSection.appendChild(signupTextNode);
-                signupSection.appendChild(signupUsername);
-                signupSection.appendChild(signupPassword);
-                signupSection.appendChild(signupButton);
+          const signupUsername = document.createElement("input");
+          signupUsername.setAttribute("type", "text");
+          signupUsername.setAttribute("placeholder", "Username");
+          signupUsername.setAttribute("id", "signup-username");
 
-                loginSection.appendChild(signupSection);
+          const signupPassword = document.createElement("input");
+          signupPassword.setAttribute("type", "password");
+          signupPassword.setAttribute("placeholder", "Password");
+          signupPassword.setAttribute("id", "signup-password");
 
-                //create signin section
-                const signinSection = document.createElement('div');
+          const signupButton = document.createElement("button");
+          signupButton.setAttribute("onclick", "signup()");
+          signupButton.innerHTML = "Submit";
 
-                const signinTextNode = document.createTextNode("Signin");
+          signupSection.appendChild(signupTextNode);
+          signupSection.appendChild(signupUsername);
+          signupSection.appendChild(signupPassword);
+          signupSection.appendChild(signupButton);
 
-                const signinUsername = document.createElement('input');
-                signinUsername.setAttribute('type','text');
-                signinUsername.setAttribute('placeholder','Username');
-                signinUsername.setAttribute('id','signin-username');
+          loginSection.appendChild(signupSection);
 
-                const signinPassword = document.createElement('input');
-                signinPassword.setAttribute('type','password');
-                signinPassword.setAttribute('placeholder','Password');
-                signinPassword.setAttribute('id','signin-password');
+          //create signin section
+          const signinSection = document.createElement("div");
 
-                const signinButton = document.createElement('button');
-                signinButton.setAttribute('onclick', 'signin()');
-                signinButton.innerHTML = 'Submit';
+          const signinTextNode = document.createTextNode("Signin");
 
-                signinSection.appendChild(signinTextNode);
-                signinSection.appendChild(signinUsername);
-                signinSection.appendChild(signinPassword);
-                signinSection.appendChild(signinButton);
+          const signinUsername = document.createElement("input");
+          signinUsername.setAttribute("type", "text");
+          signinUsername.setAttribute("placeholder", "Username");
+          signinUsername.setAttribute("id", "signin-username");
 
-                loginSection.appendChild(signinSection);
-                
-                alert(`You've been logged out successfully`);
-            }
-            
+          const signinPassword = document.createElement("input");
+          signinPassword.setAttribute("type", "password");
+          signinPassword.setAttribute("placeholder", "Password");
+          signinPassword.setAttribute("id", "signin-password");
+
+          const signinButton = document.createElement("button");
+          signinButton.setAttribute("onclick", "signin()");
+          signinButton.innerHTML = "Submit";
+
+          signinSection.appendChild(signinTextNode);
+          signinSection.appendChild(signinUsername);
+          signinSection.appendChild(signinPassword);
+          signinSection.appendChild(signinButton);
+
+          loginSection.appendChild(signinSection);
+
+          alert(`You've been logged out successfully`);
+        }
+      }
+
+      async function createNewTodo() {
+        //get todo title value, send it to BE Server in json format and the token in auth headers to BE as well
+        const token = localStorage.getItem("token");
+        const todoTitle = document.getElementById("todo-input").value;
+        const response = await axios.post(
+          "http://localhost:3000/createTodo",
+          {
+            //here give full link in axios
+            title: todoTitle, //no need to put username on left(property) in inverted commas
+          },
+          {
+            headers: {
+              Authorization: `${token}`, // Include the token in the auth headers s this route uses auth middleware
+            },
+          }
+        );
+        alert(response.data.message);
+
+        //print the todos here as well each time a new todo is created
+        const printTodosResponse = await axios.get(
+          "http://localhost:3000/printTodos",
+          {
+            //this response stores the details of the whole response, response.data gives only the data necessary
+            headers: {
+              Authorization: `${token}`, // Include the token in the auth headers as this route uses auth middleware
+            },
+          }
+        );
+
+        console.log(printTodosResponse.data);
+
+        const todosList = printTodosResponse.data;
+
+        let displayTodosSection = document.getElementById(
+          "display-todos-section"
+        );
+
+        //if first todo then create display todos screen and populate below
+        //if display todos section doesn't exist
+        if (!displayTodosSection) {
+          displayTodosSection = document.createElement("div");
+          displayTodosSection.setAttribute("id", "display-todos-section");
         }
 
-        async function createNewTodo(){
-            //get todo title value, send it to BE Server in json format and the token in auth headers to BE as well
-            const token = localStorage.getItem('token');
-            const todoTitle = document.getElementById('todo-input').value;
-            const response = await axios.post('http://localhost:3000/createTodo', { //here give full link in axios
-                title: todoTitle     //no need to put username on left(property) in inverted commas
-            },{
-                headers: {
-                'Authorization': `${token}` // Include the token in the auth headers s this route uses auth middleware
-                }
-            });
-            alert(response.data.message);
-
-            //print the todos here as well each time a new todo is created
-            const todosList = await axios.get('http://localhost:3000/printTodos', {
-                headers: {
-                'Authorization': `${token}` // Include the token in the auth headers as this route uses auth middleware
-                }
-                });
-            
-            //inject all the todos onto the screen
-            const todosSection = document.getElementById('todos-section');
-            
-            const displayTodosSection = document.createElement('div');
-            displayTodosSection.setAttribute('id','display-todos-section');
-
-            // come back here after signin printing functionality
-
-
-
-
-            
+        //else clear out the screen and populate below
+        //if display todos section exists
+        else {
+          displayTodosSection.innerHTML = "";
         }
 
+        //get username value from the token value to use below
+        const username = response.data.username;
+
+        //create the todo divs here
+        for (let i = 0; i < todosList.length; i++) {
+          const todoDiv = document.createElement("div");
+          todoDiv.setAttribute("id", `${username}-todo-${i}`);
+
+          const todoDivTitle = document.createElement(`h4`);
+          todoDivTitle.innerHTML = `${todosList[i]}`;
+          todoDivTitle.setAttribute("id", `${username}-todo-${i}-title`);
+
+          const todoDeleteBtn = document.createElement("button");
+          todoDeleteBtn.setAttribute("id", `${username}-todo-delete-btn-${i}`);
+          todoDeleteBtn.setAttribute(
+            "onclick",
+            `deleteTodo('${username}-todo-${i}', '${todosList[i]}')` //sending todoDiv id and todo div title text //YOU SHOULD WRAP THEM IN STRINGS ALWAYS THESE VARIABLES WHILE PASSING AS ARGUMENTS, REMEMBER THIS
+          );
+          todoDeleteBtn.innerHTML = "Delete";
+
+          todoDiv.appendChild(todoDivTitle);
+          todoDiv.appendChild(todoDeleteBtn);
+          displayTodosSection.appendChild(todoDiv);
+          console.log("hi from inside loop");
+        }
+        const todosSection = document.getElementById("todos-section");
+        todosSection.appendChild(displayTodosSection);
+      }
     </script>
   </head>
   <body>
     <div id="login-section">
-        <div>
-            Signup
-            <input type="text" placeholder="Username" id="signup-username">
-            <input type="password" placeholder="Password" id="signup-password">
-            <button onclick="signup()">Submit</button>
-        </div>
-        <div>
-            Signin
-            <input type="text" placeholder="Username" id="signin-username">
-            <input type="password" placeholder="Password" id="signin-password">
-            <button onclick="signin()">Submit</button>
-        </div>
+      <div>
+        Signup
+        <input type="text" placeholder="Username" id="signup-username" />
+        <input type="password" placeholder="Password" id="signup-password" />
+        <button onclick="signup()">Submit</button>
+      </div>
+      <div>
+        Signin
+        <input type="text" placeholder="Username" id="signin-username" />
+        <input type="password" placeholder="Password" id="signin-password" />
+        <button onclick="signin()">Submit</button>
+      </div>
     </div>
     <div id="todos-section"></div>
     <div id="logout-section">
-        <button onclick="logout()">Logout</button>
+      <button onclick="logout()">Logout</button>
     </div>
   </body>
 </html>

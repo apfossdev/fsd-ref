@@ -23,7 +23,7 @@ function authMiddleware(req, res, next) {
 
   if (decodedData.username) {
     req.username = decodedData.username; //to send the username to the next routes through the req by updating the req object
-    next(); 
+    next();
     // res.status(200).json({ message: "Authentication successful" }); //res or response should always be the last line in a code block //But that too is causing problems here, as next is supposed to be the last line, so if correct 200, no need to send message for now
   } else {
     res.status(401).json({ message: "You are not logged in!" });
@@ -128,22 +128,39 @@ app.post("/createTodo", authMiddleware, (req, res) => {
   console.log(users);
   res.status(200).json({
     message: "Your new todo is created!",
+    username: req.username,
   });
 });
 
-app.get('/printTodos', authMiddleware, (req, res) => {
-    //sends response with todos in json format
-    for (let obj in users) {
-      if (users[obj].username == req.username) {
-        console.log(users[obj].todos);
-        res.json(users[obj].todos);
-      }
+app.get("/printTodos", authMiddleware, (req, res) => {
+  //sends response with todos in json format
+  for (let obj in users) {
+    if (users[obj].username == req.username) {
+      console.log(users[obj].todos);
+      res.json(users[obj].todos);
     }
+  }
 });
 
-app.delete('/deleteTodo', authMiddleware, (req, res) => {
-    // get the id of the todo from the axios req and delete it from the db accordingly
-    
+app.delete("/deleteTodo", authMiddleware, (req, res) => {
+  console.log("Delete request received");
+  // get the name of the todo from the axios req and delete it from the db accordingly
+  const todoToBeDeleted = req.body.todoToBeDeleted;
+  //find the obj with the username and delete this value from it
+  for (let obj in users) {
+    if (users[obj].username == req.username) {
+      // now loop through this objects todos and when you find it delete it
+      for (let i = 0; i < users[obj].todos.length; i++) {
+        if (todoToBeDeleted == users[obj].todos[i]) {
+          users[obj].todos.splice(i, 1);
+          console.log(users[obj].todos);
+          res.json({
+            message: "The todo has been deleted successfully"
+          });
+        }
+      }
+    }
+  }
 });
 
 app.listen(port, () => {
