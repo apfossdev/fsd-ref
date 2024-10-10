@@ -10,10 +10,12 @@
             const username = document.getElementById('signup-username').value;
             const password = document.getElementById("signup-password").value;
 
-            await axios.post('http://localhost:3000/signup', {
+            const response = await axios.post('http://localhost:3000/signup', {
                 'username': username,
                 'password': password
             });
+
+            alert(response.data.message);
         }
 
         async function signin(){
